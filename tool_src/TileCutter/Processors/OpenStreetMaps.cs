@@ -17,7 +17,9 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Xml.Linq;
 using OsmSharp.Osm.Xml.Streams;
 using OsmSharp.UI.Map.Styles.MapCSS;
@@ -82,20 +84,23 @@ namespace TileCutter.Processors
 
                     IEnumerable<XElement> nodes = doc.Root.Elements("node");
 
+                    int nodeCount = 0;
                     foreach (XElement node in nodes)
                     {
                         XAttribute lat = node.Attribute("lat");
                         XAttribute lon = node.Attribute("lon");
 
-                        double newLat = double.Parse(lat.Value.Replace(".", ","))*resizeFactor;
-                        double newLon = double.Parse(lon.Value.Replace(".", ","))*resizeFactor;
+                        double newLat = double.Parse(lat.Value, CultureInfo.InvariantCulture) * resizeFactor;
+                        double newLon = double.Parse(lon.Value, CultureInfo.InvariantCulture) * resizeFactor;
 
                         lat.Value = newLat.ToString("0.000000000000000000", CultureInfo.InvariantCulture);
                         lon.Value = newLon.ToString("0.000000000000000000", CultureInfo.InvariantCulture);
+
+                        nodeCount++;
                     }
 
                     doc.Save(tempPath);
-
+                    
                     inputPath = tempPath;
                 }
 
